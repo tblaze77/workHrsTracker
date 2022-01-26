@@ -6,7 +6,9 @@ const {Employee} = require('../models/Employee');
 const {Log} = require('../models/Log');
 const logTypes = require('../helper/constants');
 
-
+router.get('/', (req,res) => {
+    res.send("aplikacija")
+})
 //get Logs
 
 // Save Employee
