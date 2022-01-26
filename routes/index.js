@@ -91,7 +91,6 @@ router.post("/scan", (req, res) => {
           user: data.username,
           type: req.body.logType,
         });
-        checkLogPosibility(data.username, req.body.logType);
         log.save((err, data) => {
           if (err) {
             console.log(err);
@@ -111,6 +110,16 @@ router.post("/scan", (req, res) => {
         status: "Denied",
         message: "Wrong QR Code (Unauthorized)",
       });
+    }
+  });
+});
+
+router.get("/logs", (req, res) => {
+  Log.find({}, (err, data) => {
+    if (!err) {
+      res.send(data);
+    } else {
+      console.log(err);
     }
   });
 });

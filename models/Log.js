@@ -14,11 +14,6 @@ const Log = mongoose.model("Log", {
     default: Date.now,
     required: true,
   },
-  active: {
-    type: Boolean,
-    default: true,
-    required: true,
-  },
 });
 
 module.exports = { Log };
