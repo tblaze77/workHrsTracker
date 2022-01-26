@@ -8,6 +8,7 @@ const logTypes = require("../helper/constants");
 const dotenv = require("dotenv");
 const jwt = require("jsonwebtoken");
 const auth = require("../middleware/auth");
+const checkLogPosibility = require("../helper/check");
 
 router.get("/", (req, res) => {
   res.send("aplikacija");
@@ -90,6 +91,7 @@ router.post("/scan", (req, res) => {
           user: data.username,
           type: req.body.logType,
         });
+        checkLogPosibility(data.username, req.body.logType);
         log.save((err, data) => {
           if (err) {
             console.log(err);
