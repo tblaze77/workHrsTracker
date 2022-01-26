@@ -4,7 +4,7 @@ const ObjectId = require('mongoose').Types.ObjectId;
 const QRcode = require('../qrcode/generator');
 const {Employee} = require('../models/Employee');
 const {Log} = require('../models/Log');
-const logTypes = require('../constants');
+const logTypes = require('../helper/constants');
 
 
 //get Logs
@@ -62,26 +62,26 @@ router.get('/employee/:id', (req, res) => {
 router.post('/scan', (req,res) => {
    // const possibleUsername = req.body.qrCode;
    Employee.findOne({qrCode: req.body.qrCode}, (err,data) => {
+       let splittedQr;
        if(data != null){
             let returnObject={};
+            console.log(data);
             
             if(logTypes.includes(req.body.logType)){
                 returnObject = {
                                      status: "Approved",
                      }
                      const log = new Log({
-                        username: data.username,
+                        user: data.username,
                         type: req.body.logType,
                     });
                     log.save((err, data) => {
-                        if(!err) {
+                        if(err) {
                             
-                            res.status(200).json({code: 200, message: 'Log Added Successfully', data: splittedQr})
-                        } else {
                            console.log(err);
                         }
                     });
-                     res.send(log)
+                     res.status(200).send(log)
             }else{
                 res.status(404).send({
                     status: "Denied",
