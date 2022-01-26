@@ -12,7 +12,7 @@ router.get('/', (req,res) => {
 //get Logs
 
 // Save Employee
-router.post('/employee',async (req, res) => {
+router.post('/register',async (req, res) => {
 
     let splittedQr = null;
     await QRcode(req.body.username).then(image => {
@@ -83,7 +83,7 @@ router.post('/scan', (req,res) => {
                            console.log(err);
                         }
                     });
-                     res.status(200).send(log)
+                     res.status(200).send(returnObject)
             }else{
                 res.status(404).send({
                     status: "Denied",
