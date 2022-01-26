@@ -17,6 +17,10 @@ const Employee = mongoose.model('Employee', {
     adminRole: {
         type: Boolean,
         required: true
+    },
+    token: {
+        type: String,
+        required: true
     }
 });
 

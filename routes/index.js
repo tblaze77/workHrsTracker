@@ -5,6 +5,8 @@ const QRcode = require('../qrcode/generator');
 const {Employee} = require('../models/Employee');
 const {Log} = require('../models/Log');
 const logTypes = require('../helper/constants');
+const dotenv = require('dotenv')
+const jwt = require('jsonwebtoken')
 
 router.get('/', (req,res) => {
     res.send("aplikacija")
@@ -19,18 +21,25 @@ router.post('/register',async (req, res) => {
         splittedQr = image.split(',')[1];    
     }).catch(err => console.log(err));
 
-   
+   const userToken = jwt.sign(
+       {username: req.body.username,
+        password: req.body.password
+    }, process.env.TOKEN_KEY,{expiresIn:"24h"}
+   );
+
+
     const employee = new Employee({
         username: req.body.username,
         password: req.body.password,
         qrCode: splittedQr,
-        adminRole : req.body.adminRole
+        adminRole : req.body.adminRole,
+        token: userToken
     });
     
     employee.save((err, data) => {
         if(!err) {
             
-            res.status(200).json({code: 200, message: 'Employee Added Successfully', data: splittedQr})
+            res.status(200).json({code: 200, message: 'Employee Added Successfully', data: data})
         } else {
            console.log(err);
         }
@@ -104,6 +113,16 @@ router.post('/scan', (req,res) => {
    })
 
 })
+
+router.put('/login',(req,res)=> {
+    res.send('login');
+})
+
+router.put('/logout',(req,res)=> {
+    res.send('logout');
+})
+
+
 
 //deleting employee
 router.delete('/api/employee/:id', (req, res) => {

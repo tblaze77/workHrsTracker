@@ -5,5 +5,4 @@ const logTypes=[
  "BREAK_END"
 ]
 
-
 module.exports = logTypes; 
