@@ -3,7 +3,11 @@ const router = express.Router();
 const ObjectId = require('mongoose').Types.ObjectId;   
 const QRcode = require('../qrcode/generator');
 const {Employee} = require('../models/Employee');
+const {Log} = require('../models/Log');
 const logTypes = require('../constants');
+
+
+//get Logs
 
 // Save Employee
 router.post('/employee',async (req, res) => {
@@ -63,22 +67,28 @@ router.post('/scan', (req,res) => {
             
             if(logTypes.includes(req.body.logType)){
                 returnObject = {
-                                            status: "Approved",
-                                            logType: req.body.logType
-                                            
+                                     status: "Approved",
                      }
-
-                     res.send(returnObject)
+                     const log = new Log({
+                        username: data.username,
+                        type: req.body.logType,
+                    });
+                    log.save((err, data) => {
+                        if(!err) {
+                            
+                            res.status(200).json({code: 200, message: 'Log Added Successfully', data: splittedQr})
+                        } else {
+                           console.log(err);
+                        }
+                    });
+                     res.send(log)
             }else{
                 res.status(404).send({
                     status: "Denied",
                     message: "Log Type doesn't exist"
                 })
             }
-            
-            
-         
-           
+              
            
            if(logTypes.includes(req.body.logType));
         

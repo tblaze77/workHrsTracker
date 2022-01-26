@@ -17,4 +17,4 @@ const Log = mongoose.model('Log', {
     }
 });
 
-module.exports = {Employee}
+module.exports = {Log}
