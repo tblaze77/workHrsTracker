@@ -3,20 +3,28 @@ const router = express.Router();
 const ObjectId = require('mongoose').Types.ObjectId;   
 const QRcode = require('../qrcode/generator');
 const {Employee} = require('../models/Employee');
+const logTypes = require('../constants');
 
 // Save Employee
-router.post('/employee', (req, res) => {
-    const newQrCode = QRcode(req.body.username).toString();
+router.post('/employee',async (req, res) => {
+
+    let splittedQr = null;
+    await QRcode(req.body.username).then(image => {
+        splittedQr = image.split(',')[1];    
+    }).catch(err => console.log(err));
+
+   
     const employee = new Employee({
         username: req.body.username,
         password: req.body.password,
-        qrcode: newQrCode,
+        qrCode: splittedQr,
         adminRole : req.body.adminRole
     });
+    
     employee.save((err, data) => {
         if(!err) {
             
-            res.status(200).json({code: 200, message: 'Employee Added Successfully', addEmployee: data})
+            res.status(200).json({code: 200, message: 'Employee Added Successfully', data: splittedQr})
         } else {
            console.log(err);
         }
@@ -45,6 +53,45 @@ router.get('/employee/:id', (req, res) => {
         }
     });
 });
+
+//check if employee exists in database
+router.post('/scan', (req,res) => {
+   // const possibleUsername = req.body.qrCode;
+   Employee.findOne({qrCode: req.body.qrCode}, (err,data) => {
+       if(data != null){
+            let returnObject={};
+            
+            if(logTypes.includes(req.body.logType)){
+                returnObject = {
+                                            status: "Approved",
+                                            logType: req.body.logType
+                                            
+                     }
+
+                     res.send(returnObject)
+            }else{
+                res.status(404).send({
+                    status: "Denied",
+                    message: "Log Type doesn't exist"
+                })
+            }
+            
+            
+         
+           
+           
+           if(logTypes.includes(req.body.logType));
+        
+       } else {
+           
+           res.status(404).send({
+               status: "Denied",
+               message: "Wrong QR Code (Unauthorized)"
+           })
+       }
+   })
+
+})
 
 //deleting employee
 router.delete('/api/employee/:id', (req, res) => {

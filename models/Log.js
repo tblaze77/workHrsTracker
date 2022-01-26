@@ -1,21 +1,18 @@
 const mongoose = require ('mongoose');
 
 
-const Employee = mongoose.model('Employee', {
-    username: {
+const Log = mongoose.model('Log', {
+    type: {
         type: String,
         required: true
     },
-    password: {
+    user: {
         type: String,
         required: true
     },
-    qrCode: {
-        type: String,
-        required: true
-    },
-    adminRole: {
-        type: Boolean,
+    timestamp: { 
+        type : Date, 
+        default: Date.now,
         required: true
     }
 });
