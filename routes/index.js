@@ -8,7 +8,6 @@ const logTypes = require("../helper/constants");
 const dotenv = require("dotenv");
 const jwt = require("jsonwebtoken");
 const auth = require("../middleware/auth");
-const checkLogPosibility = require("../helper/check");
 
 router.get("/", (req, res) => {
   res.send("aplikacija");
