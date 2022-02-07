@@ -8,6 +8,7 @@ const logTypes = require("../helper/constants");
 const dotenv = require("dotenv");
 const jwt = require("jsonwebtoken");
 const auth = require("../middleware/auth");
+const check = require("../helper/check");
 
 router.get("/", (req, res) => {
   res.send("aplikacija");
@@ -62,6 +63,24 @@ router.get("/employees", (req, res) => {
   });
 });
 
+router.get("/logs/:id", (req, res) => {
+  Employee.findById(req.params.id, (err, data) => {
+    if (data) {
+      let username = data.username;
+      Log.find({ user: data.username }, (err, data) => {
+        if (Object.keys(data).length === 0) {
+          console.log(data);
+          res.status(404).send("There are no logs for user " + username);
+        } else {
+          res.status(200).send(data);
+        }
+      });
+    } else {
+      res.status(404).send("employee non existent");
+    }
+  });
+});
+
 //get specific employee
 router.get("/employee/:id", (req, res) => {
   Employee.findById(req.params.id, (err, data) => {
@@ -74,9 +93,9 @@ router.get("/employee/:id", (req, res) => {
 });
 
 //check if employee exists in database
-router.post("/scan", (req, res) => {
+router.post("/scan", async (req, res) => {
   // const possibleUsername = req.body.qrCode;
-  Employee.findOne({ qrCode: req.body.qrCode }, (err, data) => {
+  Employee.findOne({ qrCode: req.body.qrCode }, async (err, data) => {
     let splittedQr;
     if (data != null) {
       let returnObject = {};
@@ -90,12 +109,18 @@ router.post("/scan", (req, res) => {
           user: data.username,
           type: req.body.logType,
         });
-        log.save((err, data) => {
-          if (err) {
-            console.log(err);
-          }
-        });
-        res.status(200).send(returnObject);
+
+        let isFirstArrival = await check(log);
+        if (isFirstArrival) {
+          log.save((err, data) => {
+            if (err) {
+              console.log(err);
+            }
+          });
+          res.status(200).send(returnObject);
+        } else {
+          res.status(400).send("lose si");
+        }
       } else {
         res.status(404).send({
           status: "Denied",
