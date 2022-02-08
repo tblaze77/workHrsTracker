@@ -11,7 +11,7 @@ const auth = require('../middleware/auth');
 const check = require('../helper/check');
 
 router.get('/', (req, res) => {
-  res.send('aplikacija');
+  res.send('ja sam test deploya');
 });
 //get Logs
 
@@ -63,6 +63,7 @@ router.get('/employees', (req, res) => {
   });
 });
 
+//list indivdual logs of every employee by his ID
 router.get('/logs/:id', (req, res) => {
   Employee.findById(req.params.id, (err, data) => {
     if (data) {
