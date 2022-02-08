@@ -8,7 +8,12 @@ const logTypes = require('../helper/constants');
 const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
 const auth = require('../middleware/auth');
-const check = require('../helper/check');
+const {
+  checkArrival,
+  checkDeparture,
+  checkLunchStart,
+  checkLunchEnd,
+} = require('../helper/check');
 
 router.get('/', (req, res) => {
   res.send('ja sam test deploya');
@@ -95,6 +100,7 @@ router.get('/employee/:id', (req, res) => {
 
 //check if employee exists in database
 router.post('/scan', async (req, res) => {
+  let canSave = false;
   // const possibleUsername = req.body.qrCode;
   Employee.findOne({ qrCode: req.body.qrCode }, async (err, data) => {
     let splittedQr;
@@ -110,9 +116,23 @@ router.post('/scan', async (req, res) => {
           user: data.username,
           type: req.body.logType,
         });
+        if (log.type == 'ARRIVAL') canSave = await checkArrival(log);
 
-        let isFirstArrival = await check(log);
-        if (isFirstArrival) {
+        if (log.type == 'DEPARTURE') {
+          canSave = await checkDeparture(log);
+        }
+
+        if (log.type == 'BREAK_START') {
+          canSave = await checkLunchStart(log);
+        }
+
+        if (log.type == 'BREAK_END') {
+          canSave = await checkLunchEnd(log);
+        }
+
+        console.log(canSave);
+
+        if (canSave) {
           log.save((err, data) => {
             if (err) {
               console.log(err);
@@ -120,7 +140,23 @@ router.post('/scan', async (req, res) => {
           });
           res.status(200).send(returnObject);
         } else {
-          res.status(400).send('Cannot Arrive twice in a row');
+          if (log.type == 'ARRIVAL')
+            res
+              .status(400)
+              .send('Cannot Arrive twice in a row or after depature');
+          if (log.type == 'DEPARTURE')
+            res
+              .status(400)
+              .send(
+                'Cannot departure multpile times or before arriving or before break ended'
+              );
+          if (log.type == 'BREAK_START')
+            res
+              .status(400)
+              .send('Break can start only after arrival or break end');
+
+          if (log.type == 'BREAK_END')
+            res.status(400).send('Break can end only after break started');
         }
       } else {
         res.status(404).send({
